@@ -1,0 +1,20 @@
+# Backend
+backend/venv/
+backend/__pycache__/
+backend/data/bmw.db
+backend/data/*.db
+backend/.env
+backend/test_models.py
+**/__pycache__/
+*.pyc
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# VS Code
+.vscode/
+
+# General
+.DS_Store
+*.log
