@@ -1,6 +1,8 @@
 import numpy as np
 from sentence_transformers import SentenceTransformer
 import faiss
+import os
+os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 
 # ── BMW-specific examples ─────────────────────────────────────────────────────
 BMW_EXAMPLES = [
@@ -56,7 +58,7 @@ ALL_EXAMPLES = BMW_EXAMPLES + GENERIC_EXAMPLES
 class RAGPipeline:
     def __init__(self):
         print("🔄 Loading embedding model...")
-        self.model = SentenceTransformer('all-MiniLM-L6-v2')
+        self.model = SentenceTransformer('all-MiniLM-L6-v2', device='cpu')
         self.examples = ALL_EXAMPLES
         self._build_index()
         print(f"✅ RAG pipeline ready ({len(self.examples)} examples)")
