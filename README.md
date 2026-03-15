@@ -72,8 +72,8 @@ Built for the problem that every data team faces: business users wait days for s
                │
                ▼
 ┌─────────────────────────────────────┐
-│      Groq (LLaMA 3.3 70B)          │
-│   Generates 3 executive insights   │
+│      Groq (LLaMA 3.3 70B)           │
+│   Generates 3 executive insights    │
 │   from query results                │
 └──────────────┬──────────────────────┘
                │
