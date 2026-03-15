@@ -21,7 +21,7 @@ Built for the problem that every data team faces: business users wait days for s
 ## Screenshots
 
 ![Landing Page](landing.png)
-![Dashboard](Dashboard.png)
+![Dashboard](dashboard.png)
 ![Follow-up](followup.png)
 
 ---
