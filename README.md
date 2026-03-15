@@ -45,10 +45,10 @@ Built for the problem that every data team faces: business users wait days for s
 
 ## Architecture
 
-```
-User Query (Natural Language)
-        │
-        ▼
+`
+    User Query (Natural Language)
+               │
+               ▼
 ┌─────────────────────────────────────┐
 │           RAG Pipeline              │
 │  FAISS Index + Sentence Embeddings  │
