@@ -2,7 +2,7 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
-import shutil, os, tempfile
+import shutil, os, tempfile, contextlib
 
 from database import (
     init_db, run_query, create_session, get_sessions, get_session_messages,
@@ -13,7 +13,15 @@ from database import (
 from chart_selector import select_charts
 from llm import generate_sql, generate_summary, generate_dataset_metadata
 
-app = FastAPI(title="BMW Dashboard API")
+@contextlib.asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Initialize the database
+    init_db()
+    yield
+    # Shutdown: Clean up resources if needed
+    pass
+
+app = FastAPI(title="BMW Dashboard API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -22,9 +30,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.on_event("startup")
-def startup():
-    init_db()
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
 
 class QueryRequest(BaseModel):
     question: str

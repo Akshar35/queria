@@ -57,22 +57,42 @@ ALL_EXAMPLES = BMW_EXAMPLES + GENERIC_EXAMPLES
 
 class RAGPipeline:
     def __init__(self):
-        print("🔄 Loading embedding model...")
-        self.model = SentenceTransformer('all-MiniLM-L6-v2', device='cpu')
+        self._model = None
         self.examples = ALL_EXAMPLES
-        self._build_index()
-        print(f"✅ RAG pipeline ready ({len(self.examples)} examples)")
+        self.index = None
+        self.embeddings = None
+        print(f"✅ RAG pipeline initialized with {len(self.examples)} examples (model will load on first use)")
 
-    def _build_index(self):
-        questions = [e['q'] for e in self.examples]
-        embeddings = self.model.encode(questions, convert_to_numpy=True)
-        dimension = embeddings.shape[1]
-        self.index = faiss.IndexFlatL2(dimension)
-        self.index.add(embeddings.astype(np.float32))
-        self.embeddings = embeddings
+    @property
+    def model(self):
+        if self._model is None:
+            try:
+                print("🔄 Loading embedding model...")
+                self._model = SentenceTransformer('all-MiniLM-L6-v2', device='cpu')
+                print("✅ Embedding model loaded.")
+            except Exception as e:
+                print(f"❌ Error loading embedding model: {e}")
+                raise
+        return self._model
+
+    def _ensure_indexed(self):
+        if self.index is None:
+            try:
+                print("🔄 Building RAG index...")
+                questions = [e['q'] for e in self.examples]
+                embeddings = self.model.encode(questions, convert_to_numpy=True)
+                dimension = embeddings.shape[1]
+                self.index = faiss.IndexFlatL2(dimension)
+                self.index.add(embeddings.astype(np.float32))
+                self.embeddings = embeddings
+                print("✅ RAG index built.")
+            except Exception as e:
+                print(f"❌ Error building RAG index: {e}")
+                raise
 
     def get_similar_examples(self, user_query: str, top_k: int = 3) -> list:
         """Retrieve top_k most similar example queries."""
+        self._ensure_indexed()
         query_embedding = self.model.encode([user_query], convert_to_numpy=True)
         distances, indices = self.index.search(query_embedding.astype(np.float32), top_k)
         results = []
