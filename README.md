@@ -18,6 +18,14 @@ Built for the problem that every data team faces: business users wait days for s
 > Run locally — see setup instructions below.  
 > GitHub: [github.com/Akshar35/queria](https://github.com/Akshar35/queria)
 
+## Screenshots
+
+![Landing Page](screenshots/landing.png)
+
+![Dashboard Query](screenshots/Dashboard.png)
+
+![Follow-up Query](screenshots/followup.png)
+
 ---
 
 ## Key Features
