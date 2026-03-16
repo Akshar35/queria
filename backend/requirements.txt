@@ -8,3 +8,4 @@ numpy
 python-dotenv
 groq
 pydantic
+python-multipart
