@@ -1,5 +1,5 @@
 ## Live Demo
-🌐 [queria.vercel.app](https://queria.vercel.app)
+🌐 [queria.vercel.app](https://queriabi.vercel.app/)
 # Queria — Conversational BI Dashboard
 
 > **Ask anything. Understand everything.**  
