@@ -30,6 +30,8 @@ STRICT RULES:
 5. Never invent columns that don't exist in the schema
 6. Use ROUND() for decimal values
 7. Limit raw row queries to 500 rows maximum
+8. When user asks "mileage of [model]" — return AVG(mpg) grouped by model, NOT raw mileage rows
+9. Never return raw rows when an aggregation makes more sense
 """
 
 def generate_sql(user_query: str, chat_history: list = None) -> dict:

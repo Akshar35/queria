@@ -50,6 +50,11 @@ GENERIC_EXAMPLES = [
      "sql": "SELECT col_x, col_y FROM table_name ORDER BY col_x LIMIT 500"},
     {"q": "Distribution of values across buckets",
      "sql": "SELECT category_col, COUNT(*) as count FROM table_name WHERE category_col IS NOT NULL GROUP BY category_col"},
+    {"q": "Tell me the mileage of 3 Series",
+    "sql": "SELECT model, ROUND(AVG(mpg),1) as avg_mpg FROM vehicles WHERE model='3 Series' GROUP BY model"},
+
+    {"q": "Which models have the best fuel efficiency",
+    "sql": "SELECT model, ROUND(AVG(mpg),1) as avg_mpg FROM vehicles GROUP BY model ORDER BY avg_mpg DESC"},
 ]
 
 ALL_EXAMPLES = BMW_EXAMPLES + GENERIC_EXAMPLES
