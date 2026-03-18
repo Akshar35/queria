@@ -54,7 +54,8 @@ def generate_sql(user_query: str, chat_history: list = None) -> dict:
                 history_context += f"User Question: {msg['content'].get('question', '')}\n"
             else:
                 history_context += f"Assistant SQL: {msg['content'].get('sql', 'No SQL generated.')}\n"
-        history_context += f"\nNEW QUESTION: {user_query}\n(Use the context above for references like 'filter this' or 'previous result'.)\n"
+                history_context += f"Assistant Result (sample): {str(msg['content'].get('data', [])[:2])}\n"
+                history_context += f"\nNEW QUESTION: {user_query}\n(Use the context above for references like 'filter this' or 'previous result'.)\n"
         full_user_prompt = history_context
     else:
         full_user_prompt = user_query
