@@ -46,6 +46,32 @@ export default function ChartCard({ chartConfig, data, index }) {
         </div>
       )
     }
+
+    if (type === "stat") {
+      const entries = Object.entries(data[0])
+      return (
+        <div style={{
+          padding: "40px 24px", textAlign: "center",
+          background: "var(--accent-pale)",
+          border: "1px solid var(--accent-border)",
+          borderRadius: 8
+        }}>
+          {entries.map(([k, v]) => (
+            <div key={k} style={{ marginBottom: 12 }}>
+              <p style={{
+                fontFamily: "var(--font-mono)", fontSize: 11,
+                color: "var(--charcoal-muted)", textTransform: "uppercase", letterSpacing: 2
+              }}>{k}</p>
+              <p style={{
+                fontFamily: "var(--font-display)", fontSize: 36,
+                fontWeight: 700, color: "var(--accent)"
+              }}>{String(v)}</p>
+            </div>
+          ))}
+        </div>
+      )
+    }
+
     if (type === "line") {
       const chartData = pivotedData ? pivotedData.rows : data
       const lineKeys = pivotedData ? pivotedData.categories : yKeys.filter(k => k !== "year")
