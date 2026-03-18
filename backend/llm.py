@@ -34,19 +34,35 @@ STRICT RULES:
 9. Never return raw rows when an aggregation makes more sense
 """
 
+
+def _call_groq_sql(system: str, full_user_prompt: str) -> str:
+    """Fallback SQL generation using Groq."""
+    print("⚠️ Using Groq fallback for SQL generation...")
+    response = groq_client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {"role": "system", "content": system},
+            {"role": "user", "content": full_user_prompt}
+        ],
+        temperature=0.1,
+        max_tokens=500
+    )
+    return response.choices[0].message.content.strip()
+
+
 def generate_sql(user_query: str, chat_history: list = None) -> dict:
 
     # Step 1: RAG retrieval
     similar = rag.get_similar_examples(user_query, top_k=3)
     rag_context = rag.format_for_prompt(similar)
 
-    # Step 2: Build prompt using the ACTIVE schema (BMW or uploaded CSV)
+    # Step 2: Build prompt
     system = SYSTEM_PROMPT.format(
         schema=get_active_schema(),
         rag_examples=rag_context
     )
 
-    # Step 3: Include conversation history for follow-up context
+    # Step 3: Include conversation history
     if chat_history and len(chat_history) > 0:
         history_context = "PREVIOUS CONVERSATION CONTEXT:\n"
         for msg in chat_history[-6:]:
@@ -55,29 +71,34 @@ def generate_sql(user_query: str, chat_history: list = None) -> dict:
             else:
                 history_context += f"Assistant SQL: {msg['content'].get('sql', 'No SQL generated.')}\n"
                 history_context += f"Assistant Result (sample): {str(msg['content'].get('data', [])[:2])}\n"
-        
-        # This must be OUTSIDE the for loop
+
         history_context += f"\nNEW QUESTION: {user_query}\n"
         history_context += f"CRITICAL: If the new question uses words like 'its', 'this', 'that model', 'same' — they refer to the LAST query result above. Use the exact model/filter from the previous SQL.\n"
         full_user_prompt = history_context
     else:
         full_user_prompt = user_query
 
-    # Step 4: Call Gemini
+    # Step 4: Call Gemini with Groq fallback
     print(f"🤖 Calling Gemini with: {user_query[:60]}...")
-    response = client.models.generate_content(
-        model="models/gemini-2.5-flash",
-        config={
-            "system_instruction": system,
-            "temperature": 0.1,
-            "max_output_tokens": 500
-        },
-        contents=full_user_prompt
-    )
-
-    result = response.text.strip()
-
-    print(f"📝 Gemini  returned: {result[:100]}...")
+    try:
+        response = client.models.generate_content(
+            model="models/gemini-2.5-flash",
+            config={
+                "system_instruction": system,
+                "temperature": 0.1,
+                "max_output_tokens": 500
+            },
+            contents=full_user_prompt
+        )
+        result = response.text.strip()
+        print(f"📝 Gemini returned: {result[:100]}...")
+    except Exception as e:
+        if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e) or "quota" in str(e).lower():
+            print("⚠️ Gemini quota exceeded — falling back to Groq...")
+            result = _call_groq_sql(system, full_user_prompt)
+            print(f"📝 Groq fallback returned: {result[:100]}...")
+        else:
+            raise
 
     if result.startswith("CANNOT_ANSWER:"):
         return {
@@ -96,9 +117,6 @@ def generate_sql(user_query: str, chat_history: list = None) -> dict:
         "rag_examples": similar
     }
 
-
-
-    
 
 def generate_summary(user_query: str, sql: str, data: list) -> str:
     if not data:
@@ -143,11 +161,6 @@ Just 3 bullets starting with •. No intro, no explanation."""
         return "• Unable to generate insights."
 
 
-
-
-
-
-
 def generate_dataset_metadata(schema_info: str) -> dict:
     """Generate a 1-sentence description and 5-6 suggested queries for a new dataset."""
     prompt = f"""You are a data analyst. I have a new dataset with the following schema:
@@ -167,24 +180,32 @@ Return your response in EXACTLY this JSON format:
         description: str
         suggestions: list[str]
 
-    response = client.models.generate_content(
-        model="models/gemini-2.5-flash",
-        config={
-            "temperature": 0.4,
-            "response_mime_type": "application/json",
-            "response_schema": DatasetMetadata,
-        },
-        contents=prompt
-    )
-    
     try:
+        response = client.models.generate_content(
+            model="models/gemini-2.5-flash",
+            config={
+                "temperature": 0.4,
+                "response_mime_type": "application/json",
+                "response_schema": DatasetMetadata,
+            },
+            contents=prompt
+        )
         data = json.loads(response.text)
         return {
             "description": data.get("description", "Explore this dataset and get instant, interactive charts."),
             "suggestions": data.get("suggestions", [])
         }
-    except:
+    except Exception as e:
+        if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e) or "quota" in str(e).lower():
+            print("⚠️ Gemini quota exceeded for metadata — using defaults...")
         return {
             "description": "Explore this dataset and get instant, interactive charts.",
-            "suggestions": []
+            "suggestions": [
+                "Show me the distribution of categories",
+                "What are the top 10 records by value?",
+                "Show trends over time",
+                "Compare averages across groups",
+                "What is the most common category?",
+                "Show the correlation between numeric columns"
+            ]
         }
