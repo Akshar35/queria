@@ -253,10 +253,10 @@ COLUMNS:
 - year (INTEGER): 1996 to 2020
 - price (INTEGER): listing price in GBP
 - transmission (TEXT): Automatic, Manual, Semi-Auto
-- mileage (INTEGER): total miles driven
+- mileage (INTEGER): total odometer reading — how far the car has been driven in miles (e.g. 67068 means the car has done 67,068 miles total). NOT fuel efficiency.
 - fuelType (TEXT): Petrol, Diesel, Hybrid, Electric, Other
 - tax (INTEGER): annual road tax in GBP
-- mpg (REAL): miles per gallon
+- mpg (REAL): fuel efficiency in miles per gallon — higher is better (e.g. 57.6 mpg). Use THIS column when user asks about "fuel efficiency", "mileage per gallon", "how economical", or "fuel economy".
 - engineSize (REAL): engine displacement in litres
 
 VALID VALUES:
@@ -267,4 +267,8 @@ VALID VALUES:
 - transmission: ['Automatic','Manual','Semi-Auto']
 - year: 1996 to 2020
 TOTAL ROWS: ~10,783
+
+IMPORTANT COLUMN CLARIFICATION:
+- User asks "mileage" or "fuel efficiency" or "economical" or "mpg" → use mpg column
+- User asks "how far driven" or "odometer" or "how much used" → use mileage column
 """
