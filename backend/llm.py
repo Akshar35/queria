@@ -55,7 +55,10 @@ def generate_sql(user_query: str, chat_history: list = None) -> dict:
             else:
                 history_context += f"Assistant SQL: {msg['content'].get('sql', 'No SQL generated.')}\n"
                 history_context += f"Assistant Result (sample): {str(msg['content'].get('data', [])[:2])}\n"
-                history_context += f"\nNEW QUESTION: {user_query}\n(Use the context above for references like 'filter this' or 'previous result'.)\n"
+        
+        # This must be OUTSIDE the for loop
+        history_context += f"\nNEW QUESTION: {user_query}\n"
+        history_context += f"CRITICAL: If the new question uses words like 'its', 'this', 'that model', 'same' — they refer to the LAST query result above. Use the exact model/filter from the previous SQL.\n"
         full_user_prompt = history_context
     else:
         full_user_prompt = user_query
