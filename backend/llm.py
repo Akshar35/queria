@@ -131,6 +131,9 @@ User asked: "{user_query}"
 Full dataset has {total_rows} rows. Top results:
 {sample}
 
+CRITICAL: Only reference models, values and facts that appear in the data above.
+Never invent car brands like Toyota, Tesla, Honda — this is BMW data only.
+
 Write EXACTLY 3 bullet points that would impress a business executive.
 Each bullet must:
 - Name specific models/categories by name, not just numbers
